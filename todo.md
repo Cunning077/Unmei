@@ -1,0 +1,5 @@
+ - [x] finish creat acccount @done(10/13/26 22:57)
+ - [x] add username tests to login @done(10/13/26 22:57)
+ - [x] create login sql query @done(10/14/26 13:28)
+ - [ ] create progression sql temps
+ - [ ] create world state sql temps

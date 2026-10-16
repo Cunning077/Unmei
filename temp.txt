@@ -1,0 +1,16 @@
+
+    try:
+        cursor.execute(
+            sql,
+            (username, passphrase_hash, passphrase_filename)
+        )
+        connection.commit()
+        return True, "Account created successfully."
+
+    except mariadb.IntegrityError as exc:
+        connection.rollback()
+
+        if exc.errno == 1062:
+            return False, "That username is already taken."
+
+        raise

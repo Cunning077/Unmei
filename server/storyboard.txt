@@ -1,0 +1,4 @@
+Here im gonna try and gather my thoughs what i want the general story and feel to be for the game.
+
+For one i want this to be activated through ssh but be open to web apps like opening local webpages to allow for more intuitive style then terminal, also maybe like weblet style to allow again a different feel as if each event is an almost entirely different style of the game.
+
