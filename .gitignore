@@ -3,7 +3,5 @@
 deployment.sh
 .venv/
 .venv/*
-database/*
-database
 __pycache__/
 *.pyc
