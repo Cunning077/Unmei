@@ -15,7 +15,6 @@ def initiate_connection(Scenes):
     player_id = settleConnection(fingerprint)
     if not player_id:
         response = Scenes.logcreateMenu()
-        uC.debug_message(Scenes.stdscr, response)
         player_id = authResponseMenu(response, Scenes)
         gen_ssh_save(player_id, public_key, fingerprint)
         return player_id, response

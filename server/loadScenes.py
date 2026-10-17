@@ -104,7 +104,7 @@ class LoadScenes:
             stdscr.refresh()
             stdscr.getch()
         startX, startY = cU.centered_cords(height, win_h, width, win_w)
-        win = curses.newwin(win_h, win_w, startX, startY)
+        win = curses.newwin(win_h, win_w, startY, startX)
         win.keypad(True)
         win.box()
         title = " UNMEI CREATE ACCOUNT"
@@ -170,10 +170,9 @@ class LoadScenes:
             stdscr.getch()
 
         startX, startY = cU.centered_cords(height, win_h, width, win_w)
-        win = curses.newwin(win_h, win_w, startX, startY)
+        win = curses.newwin(win_h, win_w, startY, startX)
         win.keypad(True)
         win.box()
-        
         title = " UNMEI LOGIN "
         win.addstr(2, (win_w - len(title)) // 2, title,
                curses.color_pair(1) | curses.A_BOLD)
@@ -210,7 +209,7 @@ class LoadScenes:
         win.refresh()
         return username, passphrase
 
-        return username, passphrase
+
 
     def read_field(self, win, y, x, max_length, masked=False):
         value = ""
@@ -220,7 +219,6 @@ class LoadScenes:
         while True:
             win.move(y, x)
             win.clrtoeol()
-
             displayed = "*" * len(value) if masked else value
             win.addnstr(y, x, displayed, max_length)
             win.move(y, x + len(value))
