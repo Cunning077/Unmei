@@ -1,7 +1,7 @@
 # Unmei
 A ssh dungeon crawler game, with a dedicated mariadb backend hosted through an ec2 instance
 
-![Demo](assets/pictures/imgage0.jpeg)
+![Demo](assets/image0.png)
 
 ## Features
 - No download required
