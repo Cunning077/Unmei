@@ -27,7 +27,7 @@ This allows auth to be a simple process for reccuring users. The current game lo
 
 3. SSH into the server instance 
     From here you simply just have to connect using the public key generated:
-        - "ssh - i {Path/To/Key} --tt unmei@3.19.70.69"
+        - "ssh -i {Path/To/Key} --tt unmei@18.189.82.182"
 
 
 ## Final notes
