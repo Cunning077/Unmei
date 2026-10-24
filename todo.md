@@ -1,5 +1,7 @@
  - [x] finish creat acccount @done(10/13/26 22:57)
  - [x] add username tests to login @done(10/13/26 22:57)
  - [x] create login sql query @done(10/14/26 13:28)
- - [ ] create progression sql temps
- - [ ] create world state sql temps
+ - [x] create progression sql temps @done(10/20/26 00:11)
+ - [x] create world state sql temps @done(10/20/26 00:11)
+ - [x] look at orchestrators working on actions @done(10/21/26 11:18) 
+ - [ ] working on puzzle 0001

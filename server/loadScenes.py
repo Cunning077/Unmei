@@ -8,6 +8,7 @@ from imagetester import BASE_DIR
 import utils.curses as cU
 import utils.auth as uA
 from dependencies.gamestate_log import gamestage_subchapters
+from dependencies.action_registry import actions_dep
 
 base_dir = Path(__file__).resolve().parent.parent
 
@@ -17,6 +18,11 @@ class LoadScenes:
         curses.curs_set(0)
         stdscr.keypad(True)
         cU.setup_colors()
+        self.loc_window = None
+        self.image_window = None
+        self.attributes_window = None
+        self.desc_window = None
+        self.actions_window = None
 
     def welcomeBoard(self):
         stdscr = self.stdscr
@@ -209,8 +215,6 @@ class LoadScenes:
         win.refresh()
         return username, passphrase
 
-
-
     def read_field(self, win, y, x, max_length, masked=False):
         value = ""
 
@@ -249,9 +253,7 @@ class LoadScenes:
         actions_h = 5
 
         stdscr = self.stdscr
-        stdscr.clear()
-        stdscr.refresh()
-        stdscr.erase()
+
         height, width = stdscr.getmaxyx()
 
         if width < min_width or height < min_height:
@@ -274,12 +276,13 @@ class LoadScenes:
                 - description_h
                 - actions_h
         )
-        description_y = content_y + content_height
+        description_y = content_height
         actions_y = description_y + description_h
         gameStageParts = gameState['gamestage'].split('-')
         chapter = gameStageParts[0]
         subchapter = gameStageParts[1]
-        loc_name = gamestage_subchapters[chapter][subchapter]['name']
+        gameStateInfo = gamestage_subchapters[chapter][subchapter]
+        loc_name = gameStateInfo['name']
         loc_packet = {
             'location': loc_name,
             'sub_location': '',
@@ -292,7 +295,7 @@ class LoadScenes:
 
         cU.draw_attributes(attributes_win, gameState['attributes'])
         cU.draw_clear_panel(center_win, "SCENE ART")
-        image_name = gamestage_subchapters[chapter][subchapter]['imagepath']
+        image_name = gameStateInfo['imagepath']
         imagePath = base_dir / 'assets' / 'art' / image_name
         if imagePath:
             try:
@@ -309,11 +312,128 @@ class LoadScenes:
 
                 
 
-        description_win = curses.newwin(description_h, width, description_y, 0,)
-        actions_win = curses.newwin(actions_h, width, actions_y, 0,)
-        cU.draw_description = (description_win, gamestage_subchapters[chapter][subchapter]['desc'])
-        cU.draw_action(actions_win, ['talk', 'open door'])
+        description_win = curses.newwin(description_h, width, description_y, 0)
+        actions_win = curses.newwin(actions_h, width, actions_y, 0)
+        cU.draw_action(actions_win, actions_dep[gameStateInfo['actions'][0]]['actions_name'], actions_dep[gameStateInfo['actions'][0]]['action_btn'])
+        cU.draw_description(description_win, gamestage_subchapters[chapter][subchapter]['desc'])
+        curses.doupdate()
+        self.loc_window = location_win
+        self.image_window = center_win
+        self.attributes_window = attributes_win
+        self.desc_window = description_win
+        self.actions_window = actions_win
+        return gameStateInfo
+
+    def dialogue_scene(self, dialogue_pack):
+        min_width = 72
+        min_height = 20
+        dialogue_height = 15
+
+        stdscr = self.stdscr
+
+
+        height, width = stdscr.getmaxyx()
+
+        if width < min_width or height < min_height:
+            message = (
+                f"Terminal too small ({width}x{height}). "
+                f"Resize to at least {min_width}x{min_height}."
+            )
+            cU.draw_text(stdscr,height // 2,1,
+                      message,max(1, width - 2),curses.A_BOLD,
+            )
+            stdscr.refresh()
+            return
+
+        right_width = width // 3
+        left_width = width - right_width
+        content_h = (
+                height
+                - dialogue_height
+        )
+        dialogue_y = content_h
+        image_win = curses.newwin(content_h, left_width, 0, 0)
+        actions_win = curses.newwin(content_h, right_width, 0, left_width)
+        cU.draw_action(actions_win, dialogue_pack['btns'], dialogue_pack['btn_keys'])
+        cU.draw_clear_panel(image_win, "SCENE ART")
+        imagePath = base_dir / 'assets' / 'art' / 'speak0001_todo.png'
+        if imagePath:
+            try:
+                cU.draw_image(image_win, imagePath, top=1, left=1, max_width=left_width - 2, max_height=content_h - 2,)
+            except (OSError, ValueError) as error:
+                cU.draw_text(
+                    image_win,
+                    2,
+                    2,
+                    f"Could not load image: {error}",
+                    left_width - 4,
+                )
+        image_win.noutrefresh()
+        description_win = curses.newwin(dialogue_height, width, dialogue_y, 0)
+        cU.draw_description(description_win, dialogue_pack['message'])
         curses.doupdate()
 
+    def render_next_scene(self, scene_packet):
+        #this scene is gonna be copy or render scene given a diff pack
+        min_width = 72
+        min_height = 20
+        desc_h = 5
+        actions_h = 5
+        stdscr = self.stdscr
+        height, width = stdscr.getmaxyx()
+        if width < min_width or height < min_height:
+            message = (
+                f"Terminal too small ({width}x{height})."
+                f"Resize to at least {min_width}x{min_height}."
+            )
+            cU.draw_text(stdscr,height // 2,1,
+                      message,max(1, width - 2),curses.A_BOLD,
+            )
+            stdscr.refresh()
+            return
 
-        
+        content_y = 0
+        left_width = width // 4
+        right_width = width // 4
+        center_width = width - left_width - right_width
+        content_height = (
+                height
+                - desc_h
+                - actions_h
+        )
+        description_y = content_height
+        actions_y = description_y + desc_h
+        location_win = curses.newwin(content_height, left_width, content_y, 0)
+        center_win = curses.newwin(content_height, center_width, content_y, left_width)
+        attributes_win = curses.newwin(content_height, right_width, content_y, left_width + center_width)
+        cU.draw_location(location_win, scene_packet['location'])
+        cU.draw_attributes(attributes_win, scene_packet['attributes'])
+        cU.draw_clear_panel(center_win, "SCENE ART")
+        image_name = scene_packet['imagepath']
+        imagePath = base_dir / 'assets' / 'art' / image_name
+        if imagePath:
+            try:
+                cU.draw_image(center_win, imagePath, top=1, left=1, max_width=center_width - 2, max_height=content_height - 2,)
+            except (OSError, ValueError) as error:
+                cU.draw_text(
+                    center_win,
+                    2,
+                    2,
+                    f"Could not load image: {error}",
+                    center_width - 4,
+                )
+        center_win.noutrefresh()
+
+                
+
+        description_win = curses.newwin(desc_h, width, description_y, 0)
+        actions_win = curses.newwin(actions_h, width, actions_y, 0)
+        cU.draw_action(actions_win, scene_packet['actions'], scene_packet['action_btn'])
+        cU.draw_description(description_win, scene_packet['desc'])
+        curses.doupdate()
+        self.loc_window = location_win
+        self.image_window = center_win
+        self.attributes_window = attributes_win
+        self.desc_window = description_win
+        self.actions_window = actions_win        
+

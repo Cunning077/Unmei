@@ -1,16 +1,19 @@
 import curses
 import textwrap
 from PIL import Image
+import time
 
 def setup_colors():
     curses.start_color()
-    curses.use_default_colors()
 
-    curses.init_pair(1, curses.COLOR_CYAN, -1)
-    curses.init_pair(2, curses.COLOR_WHITE, -1)
-    curses.init_pair(3, curses.COLOR_YELLOW, -1)
-    curses.init_pair(4, curses.COLOR_GREEN, -1)
-    curses.init_pair(5, curses.COLOR_RED, -1)
+
+
+    curses.init_pair(1, curses.COLOR_CYAN, curses.COLOR_BLACK)
+    curses.init_pair(2, curses.COLOR_WHITE, curses.COLOR_BLACK)
+    curses.init_pair(3, curses.COLOR_YELLOW, curses.COLOR_BLACK)
+    curses.init_pair(4, curses.COLOR_GREEN, curses.COLOR_BLACK)
+    curses.init_pair(5, curses.COLOR_RED, curses.COLOR_BLACK)
+
 
 
 def safe_addstr(win, y, x, text, attr=0):
@@ -120,20 +123,38 @@ def draw_attributes(window, attributes):
             y += 1
     window.noutrefresh()
 
+def draw_typing(window, y, x, text, delay):
+    for char in text:
+        window.addstr(y, x, char)
+        window.refresh()
+        time.sleep(delay)
+        x += 1
+
 def draw_description(window, description):
     draw_clear_panel(window, "SCENE DESCRIPTION")
     height, width = window.getmaxyx()
-    wrapped = textwrap.wrap(
-        str(description),
-        width=max(1, width - 4),
-    )
-    for y, line in enumerate(wrapped, start=2):
+    paragraphs = description.splitlines()
+    y=1
+    for paragraph in paragraphs:
+        if not paragraph.strip():
+            y += 1
+            continue
+
+        lines = textwrap.wrap(
+            paragraph.strip(),
+            width=max(1, width - 4)
+        
+        )
+        for line in lines:
+            if y >= height - 1:
+                break
+            draw_typing(window, y, 2, line, 0.001)
+            y += 1
         if y >= height - 1:
             break
-        draw_text(window, y, 2, line, width - 4)
     window.noutrefresh()
 
-def draw_action(window, actions):
+def draw_action(window, actions, actions_btn):
     draw_clear_panel(window, "ACTIONS")
     height, width = window.getmaxyx()
     column_width = max(1, (width - 4) // 2)
@@ -142,7 +163,7 @@ def draw_action(window, actions):
         column = 2 + (index % 2) * column_width
         if row >= height - 1:
             break
-        draw_text(window, row, column,f"{val}", column_width-1,)
+        draw_text(window, row, column,f"[{actions_btn[index]}] {val}", column_width-1,)
     window.noutrefresh()
 
 def draw_image(stdscr, imagePath, top, left, max_width, max_height):
@@ -170,8 +191,15 @@ def draw_image(stdscr, imagePath, top, left, max_width, max_height):
 
     image = image.resize(
         (width, height),
-        Image.Resampling.LANCZOS,
+        Image.Resampling.LANCZOS
     )
+
+    # Center the image inside the available area
+    offset_x = max(0, (max_width - width) // 2)
+    offset_y = max(0, (max_height - height // 2) // 2)
+
+    left += offset_x
+    top += offset_y
 
     pixels = image.load()
 
@@ -224,7 +252,6 @@ def draw_image(stdscr, imagePath, top, left, max_width, max_height):
 
     stdscr.noutrefresh()
 
-
 def rgb_to_256(r, g, b):
     def channel(v):
         if v < 48:
@@ -245,4 +272,23 @@ def rgb_to_256(r, g, b):
         + 6 * channel(g)
         + channel(b)
     )
+
+def change_imDescActScene(Scenes, imagePath, message, action_packet):
+    image_win = Scenes.image_window
+    image_win.erase()
+    height, width = image_win.getmaxyx()
+    draw_clear_panel(image_win, "SCENE ART")
+    draw_image(image_win, imagePath, 1, 1, width - 2, height - 2)
+    image_win.noutrefresh()
+    action_win = Scenes.actions_window
+    action_win.erase()
+    draw_clear_panel(action_win, 'ACTIONS')
+    draw_action(action_win, action_packet['actions'], action_packet['act_btn'])
+    action_win.noutrefresh()
+    desc_win = Scenes.desc_window
+    desc_win.erase()
+    draw_clear_panel(desc_win, 'DESCRIPTION')
+    draw_description(desc_win, message)
+    desc_win.noutrefresh()
+    curses.doupdate()
 

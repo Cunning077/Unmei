@@ -20,3 +20,9 @@
 
     from here the charecter will go to the witches house encountering townspeople molded by the posion in sidious ways, and when you make it your clocked
     and drugged, and you wake up in a dungeon. This is the end of the tutorial
+
+# GameLoop
+    Scene 0001 - the inn
+        This scene will start in your room at the inn, this will be a puzzle scene where you have to essentially get ready for bed completing tasks,
+        when the tasks are completed dialgoue one will appear where you will meet the sick man he will ask you to help him investigate a strange sound,
+        This will transition into scene 0002
