@@ -1,4 +1,4 @@
-# Unmei
+# Unmei - Week 2
 A ssh dungeon crawler game, with a dedicated mariadb backend hosted through an ec2 instance
 
 ![Demo](assets/image0.png)
