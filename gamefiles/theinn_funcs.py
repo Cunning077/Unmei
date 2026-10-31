@@ -10,54 +10,60 @@ import curses
 base_dir = Path(__file__).resolve().parent.parent
 
 def speak0001(Scenes, gameState):
+    with open("/tmp/unmei_debug.log", "a") as log:
+        log.write("ENTERED speak0001\n")
     action_key = {
             'status': False,
             'action_id': 'speak0001',
-            'next_scene_pack': None,
+            'next_action': ['renderScene'],
+            'next_scene_packet': None,
             'state_changed': None
     }
-    stdscr = Scenes.stdscr
-    key = stdscr.getch()
-    match chr(key):
-        case "c":
-            message = textwrap.dedent("""
-                By the gods, my memory grows more treacherous by the day…
-                I cannot for the life of me recall when this list was given unto me.
-                No matter. Let us see what remains to be done before I retire for the night.
+    stdscr = Scenes.loc_window
+    while True:
+        key = stdscr.getch()
+        match chr(key):
+            case "c":
+                message = textwrap.dedent("""
+                    By the gods, my memory grows more treacherous by the day…
+                    I cannot for the life of me recall when this list was given unto me.
+                    No matter. Let us see what remains to be done before I retire for the night.
 
-                Tonight's Duties
+                    Tonight's Duties
 
-                - Obtain the list of tasks appointed for the morrow.
-                - Bank the fire in the main quarters, lest the hearth grow cold before dawn.
-                - Answer nature's call.
-                - Wash my hands and face, and rid myself of the day's grime.
-                - Extinguish all candles before retiring.
+                    - Obtain the list of tasks appointed for the morrow.
+                    - Bank the fire in the main quarters, lest the hearth grow cold before dawn.
+                    - Answer nature's call.
+                    - Wash my hands and face, and rid myself of the day's grime.
+                    - Extinguish all candles before retiring.
 
-                There. A simple enough set of duties. Surely even my failing memory cannot betray me to forget.
-            """)
-            dialogue_packet = {'message': message, 'btns': ['Close List', 'Quit'], 'btn_keys': ['C', 'Q']}
-            Scenes.dialogue_scene(dialogue_packet)
-            key = stdscr.getch()
-            match chr(key):
-                case "c":
-                    action_key['status'] = True
-                    next_scene_pack = {
-                            'location': {'location': 'The Inn',
-                                'sub_location': '',
-                                'region': ''
-                            },
-                            'attributes': gameState['attributes'],
-                            'imagepath': 'innBedroom.jpeg',
-                            'desc': 'Well i best get on with the nights task',
-                            'actions': ar.actions_dep['puzzle_0001']['actions_name'],
-                            'action_btn': ar.actions_dep['puzzle_0001']['action_btn']
-                    }
-                    return action_key, next_scene_pack
-                case "q":
-                    gen.globalQuit()
-        
-        case 'q':
-            gen.globalQuit()
+                    There. A simple enough set of duties. Surely even my failing memory cannot betray me to forget.
+                """)
+                dialogue_packet = {'message': message, 'btns': ['Close List', 'Quit'], 'btn_keys': ['C', 'Q'], 'image': 'speak0001_todo.png'}
+                Scenes.dialogue_scene(dialogue_packet)
+                key = stdscr.getch()
+                match chr(key):
+                    case "c":
+                        action_key['status'] = True
+                        next_scene_pack = {
+                                'location': {'location': 'The Inn',
+                                    'sub_location': '',
+                                    'region': ''
+                                },
+                                'attributes': gameState['attributes'],
+                                'imagepath': 'innBedroom.jpeg',
+                                'desc': 'Well i best get on with the nights task',
+                                'actions': ar.actions_dep['puzzle_0001']['actions_name'],
+                                'action_btn': ar.actions_dep['puzzle_0001']['action_btn']
+                        }
+                        action_key['next_scene_pack'] = next_scene_pack
+                        return action_key
+                    case "q":
+                        gen.globalQuit() 
+            case 'q':
+                gen.globalQuit()
+            case _:
+                continue
 
 def render_scene(Scenes, image_name, message, actions, act_btns):
     image_path = base_dir / "assets" / "art" / image_name
@@ -75,9 +81,10 @@ def puzzle0001(Scenes, gameState):
     action_key = {
             'status': False,
             'action_id': 'speak0001',
+            'next_action': ['reqChange'],
             'state_changed': None
     }
-    stdscr = Scenes.stdscr
+    stdscr = Scenes.loc_window
     message1 = """
         Ahh, yes... now I remember. There was an opening for a position at the library.Though my memory has begun to fail me, I haven't forgotten the history of this great land.
         The powerful magicians and the kings they swore to protect... the noble knights who fought tooth and nail for control and dominion. Ah, what a grand history it is.
@@ -469,11 +476,151 @@ def puzzle0001(Scenes, gameState):
         Whew… these chores have worn me down something fierce. Best snuff the candles, draw the room into darkness, and retire to my bed.     
     """
     render_scene(Scenes, image, message, actions, btns) 
-    key = chr(stdscr.getch())
-    match key:
-        case 'b':
-            stdscr.erase()
-            stdscr.refresh()
-            time.sleep(20)
+    while True:
+        key = chr(stdscr.getch())
+        match key:
+            case 'b':
+                Scenes.stdscr.erase()
+                Scenes.stdscr.refresh()
+
+                action_key['status'] = True
+                action_key['state_changed'] = {'req': 'puzzle0001'}
+                return action_key
+            case 'q':
+                gen.globalQuit
+            case _:
+                continue
+
+def speak0002(Scenes, gameState):
+    action_key = {
+            'status': False,
+            'action_id': 'speak0001',
+            'next_action': ['reqChange'],
+            'state_changed': None
+    }
+    time.sleep(8)
+    stdscr = Scenes.stdscr
+    height, width = stdscr.getmaxyx()
+    message = """
+        ██╗  ██╗███╗   ██╗ ██████╗  ██████╗██╗  ██╗    ██╗  ██╗███╗   ██╗ ██████╗  ██████╗██╗  ██╗    ██╗██╗
+        ██║ ██╔╝████╗  ██║██╔═══██╗██╔════╝██║ ██╔╝    ██║ ██╔╝████╗  ██║██╔═══██╗██╔════╝██║ ██╔╝    ██║██║
+        █████╔╝ ██╔██╗ ██║██║   ██║██║     █████╔╝     █████╔╝ ██╔██╗ ██║██║   ██║██║     █████╔╝     ██║██║
+        ██╔═██╗ ██║╚██╗██║██║   ██║██║     ██╔═██╗     ██╔═██╗ ██║╚██╗██║██║   ██║██║     ██╔═██╗     ╚═╝╚═╝
+        ██║  ██╗██║ ╚████║╚██████╔╝╚██████╗██║  ██╗    ██║  ██╗██║ ╚████║╚██████╔╝╚██████╗██║  ██╗    ██╗██╗
+        ╚═╝  ╚═╝╚═╝  ╚═══╝ ╚═════╝  ╚═════╝╚═╝  ╚═╝    ╚═╝  ╚═╝╚═╝  ╚═══╝ ╚═════╝  ╚═════╝╚═╝  ╚═╝    ╚═╝╚═╝
+    """
+    lines = message.splitlines()
+    start_y = (height - 1) // 2
+    for line in lines:
+        start_x = (width - len(line)) // 2
+        stdscr.addstr(start_y, start_x, line)
+        stdscr.refresh()
+        start_y += 1
+    time.sleep(5)
+    height, width = stdscr.getmaxyx()
+    message = """
+         █████╗ ███╗   ██╗██╗   ██╗ ██████╗ ███╗   ██╗███████╗    ██╗  ██╗ ██████╗ ███╗   ███╗███████╗
+        ██╔══██╗████╗  ██║╚██╗ ██╔╝██╔═══██╗████╗  ██║██╔════╝    ██║  ██║██╔═══██╗████╗ ████║██╔════╝
+        ███████║██╔██╗ ██║ ╚████╔╝ ██║   ██║██╔██╗ ██║█████╗      ███████║██║   ██║██╔████╔██║█████╗  
+        ██╔══██║██║╚██╗██║  ╚██╔╝  ██║   ██║██║╚██╗██║██╔══╝      ██╔══██║██║   ██║██║╚██╔╝██║██╔══╝  
+        ██║  ██║██║ ╚████║   ██║   ╚██████╔╝██║ ╚████║███████╗    ██║  ██║╚██████╔╝██║ ╚═╝ ██║███████╗
+        ╚═╝  ╚═╝╚═╝  ╚═══╝   ╚═╝    ╚═════╝ ╚═╝  ╚═══╝╚══════╝    ╚═╝  ╚═╝ ╚═════╝ ╚═╝     ╚═╝╚══════╝
+    """
+    lines = message.splitlines()
+    start_y = (height - 1) // 2
+    for line in lines:
+        start_x = (width - len(line)) // 2
+        stdscr.addstr(start_y, start_x, line)
+        stdscr.refresh()
+        start_y += 1
+    time.sleep(5)
+    height, width = stdscr.getmaxyx()
+    message = """
+         ▀█████████▄     ▄████████ ███▄▄▄▄      ▄██████▄      ▀█████████▄     ▄████████ ███▄▄▄▄      ▄██████▄
+          ███    ███   ███    ███ ███▀▀▀██▄   ███    ███       ███    ███   ███    ███ ███▀▀▀██▄   ███    ██
+          ███    ███   ███    ███ ███   ███   ███    █▀        ███    ███   ███    ███ ███   ███   ███    █▀
+         ▄███▄▄▄██▀    ███    ███ ███   ███  ▄███             ▄███▄▄▄██▀    ███    ███ ███   ███  ▄███      
+        ▀▀███▀▀▀██▄  ▀███████████ ███   ███ ▀▀███ ████▄      ▀▀███▀▀▀██▄  ▀███████████ ███   ███ ▀▀███ ████▄
+          ███    ██▄   ███    ███ ███   ███   ███    ███       ███    ██▄   ███    ███ ███   ███   ███    ██
+          ███    ███   ███    ███ ███   ███   ███    ███       ███    ███   ███    ███ ███   ███   ███    ██
+        ▄█████████▀    ███    █▀   ▀█   █▀    ████████▀      ▄█████████▀    ███    █▀   ▀█   █▀    ████████▀
+    """
+    lines = message.splitlines()
+    start_y = (height - 1) // 2
+    for line in lines:
+        start_x = (width - len(line)) // 2
+        stdscr.addstr(start_y, start_x, line)
+        stdscr.refresh()
+        start_y += 1
+    time.sleep(5)
+    image = 'speak0002man.png'
+    message = """
+        By God's good grace, what business have you at my door at this ungodly hour? I swear,
+        if you have come to burden me with some trifling matter or nonsensical complaint,
+        I shall curse you where you stand!
+    """
+    dialogue_packet = {'message': message, 'btns': [], 'btn_keys': [], 'image': image}
+    Scenes.dialogue_scene(dialogue_packet)
+    time.sleep(5)
+    message = """
+        Forgive me for the disturbance, sir, but I fear something is terribly amiss.
+        The innmaster sits at the counter, muttering and babbling to himself
+        as though his wits have abandoned him and -
+    """
+    cU.changeDesc(Scenes, message, '??')
+    time.sleep(3)
+    message = """
+        You mean to tell me you have roused me from my slumber over the innmaster? The very man who keeps half the town's supply of ale beneath his roof?
+        And you dare call his drunken ramblings a matter of concern? By what madness do you deem this worthy of disturbing a man's rest?
+        What strange corner of the earth have you crawled from, that such foolishness should pass for a grave matter?
+    """
+    cU.changeDesc(Scenes, message, 'You')
+    time.sleep(5)
+    message = """
+        I understand, sir, but I beg you to let me finish! I have witnessed countless folk seized by such madness,
+        and it is as though some unseen force has taken hold of this town's very senses.self. Men and women alike have fallen into a state of utter hysteria!
+
+        I have heard reports of similar occurrences in the lands to the north, within the Mad King's dominion, as you well know.
+        What if he has dispatched his mage scum into Verindale? What if this is no mere coincidence, but the very beginning of a campaign against us?
+        We cannot afford to dismiss this, sir. Not if there is even the slightest chance that our town is in danger.
+    """
+    cU.changeDesc(Scenes, message, '??')
+    time.sleep(5)
+    message = """
+        You are a madman, and a paranoid one at that! There is no Mad King!
+        He is naught but a farce, a tale spun by those in power to keep us trembling in fear,
+        to keep us obedient, to keep us from questioning 
+    """
+    cU.changeDesc(Scenes, message, 'You')
+    time.sleep(3)
+    message = """
+       What was that sound? You heard it too, did you not? Or was it naught but the workings of my sleep-starved mind, playing tricks upon me in the dead of night? 
+    """
+    cU.changeDesc(Scenes, message, 'You')
+    time.sleep(3)
+    message = """
+        There! You heard it, did you not? This is precisely what I have been trying to tell you, sir! Something foul is afoot in this town, and I fear we can no longer afford to turn a blind eye.
+        The sound came from the alley, I am certain of it. We must take up arms and drive the Mad King's ambitions from Verindale before his corruption takes root!
+        For if we tarry any longer, we may soon find ourselves fighting for far more than the peace of this town!
+    """
+    cU.changeDesc(Scenes, message, '??')
+    time.sleep(2)
+    act_packet = {'actions': ['Take The Fireplace Rake', 'Q'], 'act_btns': ['T', 'Q']}
+    cU.changeActs(Scenes, act_packet)
+    while True:
+        key = stdscr.getch()
+        match chr(key):
+            case 't':
+                action_key['status'] = True
+                action_key['state_changed'] = {'req': 'speak0002'}
+                return action_key 
+            case 'q':
+                gen.globalQuit()
+            case _:
+                continue
+
+    
+
+
 
 

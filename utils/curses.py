@@ -3,16 +3,26 @@ import textwrap
 from PIL import Image
 import time
 
+
+
 def setup_colors():
     curses.start_color()
 
+    with open("/tmp/unmei_colors.log", "w") as log:
+        log.write(f"Can change colors: {curses.can_change_color()}\n")
+        log.write(f"Available colors: {curses.COLORS}\n")
+        log.write(f"Color pairs: {curses.COLOR_PAIRS}\n")
 
-
-    curses.init_pair(1, curses.COLOR_CYAN, curses.COLOR_BLACK)
-    curses.init_pair(2, curses.COLOR_WHITE, curses.COLOR_BLACK)
-    curses.init_pair(3, curses.COLOR_YELLOW, curses.COLOR_BLACK)
-    curses.init_pair(4, curses.COLOR_GREEN, curses.COLOR_BLACK)
-    curses.init_pair(5, curses.COLOR_RED, curses.COLOR_BLACK)
+    if curses.can_change_color() and curses.COLORS > 11:
+        curses.init_color(10, 1000, 1000, 1000)  # White
+        curses.init_color(11, 0, 0, 0)            # Black
+        curses.init_pair(3, 10, 11)               # White on black
+    else:
+        curses.init_pair(
+            3,
+            curses.COLOR_WHITE,
+            curses.COLOR_BLACK
+        )
 
 
 
@@ -64,9 +74,9 @@ def draw_centered(stdscr, y, text, attr=0):
     x = max(2, (width - len(text)) // 2)
     safe_addstr(stdscr, y, x, text, attr)
 
-def centered_cords(height, o_h, width, o_w):
-    x = (width - o_w) // 2
-    y = (height - o_h) // 2
+def centered_cords(height, obj_h, width, obj_w):
+    x = (width - obj_w) // 2
+    y = (height - obj_h) // 2
     return x, y
 
 def debug_message(stdscr, message, row=0):
@@ -93,7 +103,7 @@ def draw_clear_panel(window, title):
     window.box()
     height, width = window.getmaxyx()
     if width > len(title) + 4 and height >= 2:
-        draw_text(window, 0, 2, f" {title }", width - 4, curses.A_BOLD,)
+        draw_text(window, 0, 2, f" {title } ", width - 4, curses.A_BOLD,)
 
 def draw_location(window, scene):
     draw_clear_panel(window, 'LOCATION')
@@ -130,8 +140,8 @@ def draw_typing(window, y, x, text, delay):
         time.sleep(delay)
         x += 1
 
-def draw_description(window, description):
-    draw_clear_panel(window, "SCENE DESCRIPTION")
+def draw_description(window, description, title):
+    draw_clear_panel(window, title)
     height, width = window.getmaxyx()
     paragraphs = description.splitlines()
     y=1
@@ -148,7 +158,7 @@ def draw_description(window, description):
         for line in lines:
             if y >= height - 1:
                 break
-            draw_typing(window, y, 2, line, 0.001)
+            draw_typing(window, y, 2, line,  0.001) #0.02)
             y += 1
         if y >= height - 1:
             break
@@ -204,7 +214,7 @@ def draw_image(stdscr, imagePath, top, left, max_width, max_height):
     pixels = image.load()
 
     pair_ids = {}
-    next_pair = 1
+    next_pair = 4
     max_pairs = curses.COLOR_PAIRS - 1
 
     def get_pair(fg, bg):
@@ -273,6 +283,52 @@ def rgb_to_256(r, g, b):
         + channel(b)
     )
 
+def draw_bar(window, y, x, current, maximum, width, color):
+    if maximum <= 0:
+        ratio = 0
+    else:
+        ratio = max(0, min(1, current / maximum))
+    filled = int(ratio * width)
+    empty = width - filled
+    window.addstr(y, x, "█" * filled, color)
+    window.addstr(y, x + filled, "░" * empty)
+
+def draw_enemy_info(window, enemy_info_pack):
+    draw_clear_panel(window, 'ENEMY INFO')
+    height, width = window.getmaxyx()
+    size_enemy_col1 = len(enemy_info_pack['enemy_name'])
+    column_width = max(1, (width-4) // 2)
+    draw_text(window, 1, 2, enemy_info_pack['enemy_name'], column_width)
+    draw_bar(window, 1, column_width + 2, enemy_info_pack['current_health'], enemy_info_pack['max_health'], column_width, curses.color_pair(3))
+    draw_text(window, 2, 1, '-' * width, width)
+    draw_text(window, 3, 2, 'Enemy Type', column_width)
+    draw_text(window, 3, column_width + 2, enemy_info_pack['enemy_type'], column_width)
+    draw_text(window, 4, 1, '-' * width, width)
+    draw_text(window, 5, 2, 'Attack Style', column_width)
+    draw_text(window, 5, column_width + 2, enemy_info_pack['attack_style'], column_width)
+
+    draw_text(window, 7, 2, 'Enemy Lvl', column_width)
+    draw_text(window, 7, column_width + 2, enemy_info_pack['enemy_lvl'], column_width)
+
+def draw_enemy_status(window, enemy_status_pack):
+    draw_clear_panel(window, 'ENEMY STATUS')
+    height, wdith = window.getmaxyx()
+    #not sure what to do yet for this
+
+def draw_character_info(window, hero_info_pack):
+    draw_clear_panel(window, 'HERO INFO')
+    height, width = window.getmaxyx()
+    column_width = max(1, (width-4) // 2)
+    draw_text(window, 1, 2, 'Health', column_width)
+    draw_bar(window, 2, 3, hero_info_pack['health'], hero_info_pack['max_health'], column_width, curses.color_pair(3))
+    draw_text(window, 4, 2, 'Mana', column_width)
+    draw_bar(window, 5, 3, hero_info_pack['mana'], hero_info_pack['max_mana'], column_width, curses.color_pair(3))
+    i = 1
+    col_gap = int(column_width * 0.33)
+    for name, val in hero_info_pack['attributes'].items():
+        draw_text(window, i, column_width + col_gap, f'{name}: {val}', column_width)
+        i += 1
+
 def change_imDescActScene(Scenes, imagePath, message, action_packet):
     image_win = Scenes.image_window
     image_win.erase()
@@ -287,8 +343,35 @@ def change_imDescActScene(Scenes, imagePath, message, action_packet):
     action_win.noutrefresh()
     desc_win = Scenes.desc_window
     desc_win.erase()
-    draw_clear_panel(desc_win, 'DESCRIPTION')
-    draw_description(desc_win, message)
+    draw_description(desc_win, message, 'DESCRIPTION')
     desc_win.noutrefresh()
     curses.doupdate()
 
+def changeDesc(Scenes, message, title):
+    desc_win = Scenes.desc_window
+    desc_win.erase()
+    draw_description(desc_win, message, title)
+    desc_win.noutrefresh()
+    curses.doupdate()
+
+def changeActs(Scenes, act_packet):
+    act_win = Scenes.actions_window
+    act_win.erase()
+    draw_clear_panel(act_win, 'ACTIONS')
+    draw_action(act_win, act_packet['actions'], act_packet['act_btns'])
+    act_win.noutrefresh()
+    curses.doupdate()
+
+def inspect_window(window, name="window"):
+    height, width = window.getmaxyx()
+
+    with open("/tmp/unmei_screen_inspect.log", "a") as log:
+        log.write(f"\n--- {name} ---\n")
+        log.write(f"Dimensions: {height}x{width}\n")
+
+        for y in range(height):
+            try:
+                line = window.instr(y, 0, width - 1)
+                log.write(f"{y:03}: {line!r}\n")
+            except curses.error as exc:
+                log.write(f"{y:03}: ERROR {exc}\n")

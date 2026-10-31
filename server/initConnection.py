@@ -15,8 +15,17 @@ def initiate_connection(Scenes):
     player_id = settleConnection(fingerprint)
     if not player_id:
         response = Scenes.logcreateMenu()
+        with open("/tmp/unmei_debug.log", "a") as log:
+            log.write("after logincreate menu\n")
+
         player_id = authResponseMenu(response, Scenes)
+        with open("/tmp/unmei_debug.log", "a") as log:
+            log.write("after account auth\n")
+
         gen_ssh_save(player_id, public_key, fingerprint)
+        with open("/tmp/unmei_debug.log", "a") as log:
+            log.write("create ssh save\n")
+
         return player_id, response
         #when fingerprint is empty
     #now i have to get username, passphrase_filename, passphrase_hash

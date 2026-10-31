@@ -10,12 +10,12 @@ A ssh dungeon crawler game, with a dedicated mariadb backend hosted through an e
 - Terminal interface + future plans for extra windows
 
 ## The game
-Unmei stands for fate or destiny in japenese, i havent finished the games full storyboard, but the main idea is your a hero who encounters mystery after mystery which all will lead to the grand fate. This is week -1 of 12, each week i will expand the story and content.
+Unmei stands for fate or destiny in japenese, i havent finished the games full storyboard, but the main idea is your a hero who encounters mystery after mystery which all will lead to the grand fate. This is week 2 of 12, each week i will expand the story and content.
 
 ## This version
 This current version as stated is hosted on an ec2 instance to protect my computers, and its easiest for now. In addition i have set up the db that will hopefully carry me through to the end of this event, when a player ssh into the server it will either auto login for them or give them the option to login themselves, or create a new account (warning dont login if your ssh is already registered - havent tested this).
 
-This allows auth to be a simple process for reccuring users. The current game loop isnt in place however the first page that opens is a relative style that the game will go for, read my docs for more info.
+This allows auth to be a simple process for reccuring users. The current game loop isnt finished and only includes a brief tutorial section 
 
 ## How to play
 1. Install an ssh client
@@ -27,7 +27,7 @@ This allows auth to be a simple process for reccuring users. The current game lo
 
 3. SSH into the server instance 
     From here you simply just have to connect using the public key generated:
-        - "ssh -i {Path/To/Key} --tt unmei@18.189.82.182"
+        - "ssh -i {Path/To/Key} --t unmei@18.189.82.182"
 
 
 ## Final notes

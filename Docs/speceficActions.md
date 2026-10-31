@@ -48,3 +48,6 @@ Bedroom task p2:
     - blow out bedroom candle and go to sleep
         this will be similiar to the bathroom candles, then the entire
         screen will go black
+
+## speak 0002
+here we meet henry he will bassicaly start the story, he tells us the inn master is acting strange so we grill him and then hear a strange noise coming from the alley, this is the end of subchapter 0001

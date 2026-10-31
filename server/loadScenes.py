@@ -23,6 +23,14 @@ class LoadScenes:
         self.attributes_window = None
         self.desc_window = None
         self.actions_window = None
+        self.enemy_info_window = None
+        self.enemy_status_window = None
+        self.battle_image_window = None
+        self.hero_info_window = None
+        self.battle_actions_window = None
+        self.battle_description_window = None
+
+
 
     def welcomeBoard(self):
         stdscr = self.stdscr
@@ -50,6 +58,7 @@ class LoadScenes:
                 curses.color_pair(1) | curses.A_BOLD,
             )
         stdscr.refresh()
+
 
     def logcreateMenu(self):
         stdscr = self.stdscr
@@ -161,6 +170,9 @@ class LoadScenes:
         win.refresh()
         win.addstr(13, 4, "Creating your account...", curses.color_pair(4) | curses.A_BOLD)
         win.refresh()
+        win.erase()
+        win.noutrefresh()
+        curses.doupdate()
         return username, passphrase
 
     def loginMenu(self):
@@ -293,11 +305,15 @@ class LoadScenes:
         attributes_win = curses.newwin(content_height, right_width, content_y, left_width + center_width)
         cU.draw_location(location_win, loc_packet)
 
+        location_win.noutrefresh()
+
         cU.draw_attributes(attributes_win, gameState['attributes'])
+
+        attributes_win.noutrefresh()
         cU.draw_clear_panel(center_win, "SCENE ART")
         image_name = gameStateInfo['imagepath']
         imagePath = base_dir / 'assets' / 'art' / image_name
-        if imagePath:
+        if imagePath.is_file():
             try:
                 cU.draw_image(center_win, imagePath, top=1, left=1, max_width=center_width - 2, max_height=content_height - 2,)
             except (OSError, ValueError) as error:
@@ -309,13 +325,14 @@ class LoadScenes:
                     center_width - 4,
                 )
         center_win.noutrefresh()
-
-                
-
         description_win = curses.newwin(description_h, width, description_y, 0)
         actions_win = curses.newwin(actions_h, width, actions_y, 0)
         cU.draw_action(actions_win, actions_dep[gameStateInfo['actions'][0]]['actions_name'], actions_dep[gameStateInfo['actions'][0]]['action_btn'])
-        cU.draw_description(description_win, gamestage_subchapters[chapter][subchapter]['desc'])
+        actions_win.noutrefresh()
+ 
+        cU.draw_description(description_win, gamestage_subchapters[chapter][subchapter]['desc'], 'SCENE DESCRIPTION')
+        description_win.noutrefresh()
+
         curses.doupdate()
         self.loc_window = location_win
         self.image_window = center_win
@@ -356,7 +373,7 @@ class LoadScenes:
         actions_win = curses.newwin(content_h, right_width, 0, left_width)
         cU.draw_action(actions_win, dialogue_pack['btns'], dialogue_pack['btn_keys'])
         cU.draw_clear_panel(image_win, "SCENE ART")
-        imagePath = base_dir / 'assets' / 'art' / 'speak0001_todo.png'
+        imagePath = base_dir / 'assets' / 'art' / dialogue_pack['image']
         if imagePath:
             try:
                 cU.draw_image(image_win, imagePath, top=1, left=1, max_width=left_width - 2, max_height=content_h - 2,)
@@ -370,8 +387,11 @@ class LoadScenes:
                 )
         image_win.noutrefresh()
         description_win = curses.newwin(dialogue_height, width, dialogue_y, 0)
-        cU.draw_description(description_win, dialogue_pack['message'])
+        cU.draw_description(description_win, dialogue_pack['message'], 'SCENE DESCRIPTION')
         curses.doupdate()
+        self.image_window = image_win
+        self.desc_window = description_win
+        self.actions_window = actions_win  
 
     def render_next_scene(self, scene_packet):
         #this scene is gonna be copy or render scene given a diff pack
@@ -429,11 +449,92 @@ class LoadScenes:
         description_win = curses.newwin(desc_h, width, description_y, 0)
         actions_win = curses.newwin(actions_h, width, actions_y, 0)
         cU.draw_action(actions_win, scene_packet['actions'], scene_packet['action_btn'])
-        cU.draw_description(description_win, scene_packet['desc'])
+        cU.draw_description(description_win, scene_packet['desc'], 'SCENE DESCRIPTION')
         curses.doupdate()
         self.loc_window = location_win
         self.image_window = center_win
         self.attributes_window = attributes_win
         self.desc_window = description_win
         self.actions_window = actions_win        
+
+    def battle_scene(self, init_battle_packet):
+        min_width = 72
+        min_height = 20
+        enemy_info_h = 7
+        enemy_info_w = 0.66
+        enemy_status_h = 7
+        enemy_status_w = 0.34
+        character_info_h = 10
+        charecter_info_w = 0.66
+        actions_h = 10
+        actions_w = 0.34
+        desc_h = 5
+        stdscr = self.stdscr
+        height, width = stdscr.getmaxyx()
+        if width < min_width or height < min_height:
+            message = (
+                    f"Terminal too small ({width}x{height}.)"
+                    f"Resize to at least {min_width}x{min_height}."
+            )
+            cU.draw_text(stdscr,height // 2, 1, message,max(1, width -2), curses.A_BOLD)
+            stdscr.refresh()
+            return
+        enemy_info_w *= width 
+        enemy_info_w = int(enemy_info_w)
+        enemy_status_w *= width
+        enemy_status_w = int(enemy_status_w)
+        image_y = height - enemy_info_h - character_info_h - desc_h
+        charecter_info_w *= width
+        charecter_info_w = int(charecter_info_w)
+        actions_w *= width
+        actions_w = int(actions_w)
+
+        enemy_info_win = curses.newwin(enemy_info_h, enemy_info_w, 0, 0)
+        enemy_status_win = curses.newwin(enemy_status_h, enemy_status_w, 0, enemy_info_w)
+        image_win = curses.newwin(image_y, width, enemy_info_h, 0)
+        charecter_info_win = curses.newwin(character_info_h, charecter_info_w, enemy_info_h + image_y, 0)
+        actions_win = curses.newwin(actions_h, actions_w, enemy_info_h + image_y, charecter_info_w)
+        desc_win = curses.newwin(desc_h, width, enemy_info_h + image_y + character_info_h, 0)
+        cU.draw_enemy_info(enemy_info_win, init_battle_packet['enemy_info'])
+        enemy_info_win.noutrefresh()
+        cU.draw_enemy_status(enemy_status_win, None)
+        enemy_status_win.noutrefresh()
+        image_name = init_battle_packet['imagepath']
+        imagePath = base_dir / 'assets' / 'art' / image_name
+        cU.draw_clear_panel(image_win, 'BATTLE ART')
+        if imagePath:
+            try:
+                cU.draw_image(image_win, imagePath, top=1, left=1, max_width=width - 2, max_height=image_y - 2,)
+            except (OSError, ValueError) as error:
+                cU.draw_text(
+                    image_win,
+                    2,
+                    2,
+                    f"Could not load image: {error}",
+                    width - 4,
+                )
+        image_win.noutrefresh()
+        cU.draw_character_info(charecter_info_win, init_battle_packet['hero_info'])
+        charecter_info_win.noutrefresh()
+        cU.draw_action(actions_win, init_battle_packet['actions'], init_battle_packet['action_btns'])
+        actions_win.noutrefresh()
+        cU.draw_description(desc_win, init_battle_packet['desc'], 'BATTLE DESCRIPTION')
+        desc_win.noutrefresh()
+        curses.doupdate()
+        self.enemy_info_window = enemy_info_win
+        self.enemy_status_window = enemy_status_win
+        self.battle_image_window = image_win
+        self.hero_info_window = charecter_info_win
+        self.battle_actions_window = actions_win
+        self.battle_description_window = desc_win
+
+
+
+
+        
+
+
+
+        
+
 

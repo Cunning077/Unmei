@@ -10,5 +10,21 @@ actions_dep = {
         'actions_name': ['Check The Kist', 'Go To The Fireplace', 'Quit'],
         'action_btn': ['C', 'G', 'Q'],
         "function_file": c0s0001.puzzle0001
+    },
+    'speak_0002': {
+        'actions_name': [''],
+        "action_btn": [''],
+        'function_file': c0s0001.speak0002
+        }
+}
+
+battle_actions = {
+    'home': {
+        'actions': ['Attacks', 'Defense', 'Items', 'Spells', 'Quit'],
+        'action_btns': ['A', 'D', 'I', 'S', 'Q']
+    },
+    'attacks': {
+        'actions': ['Quick-Attack', 'Light-Attack', 'Heavy-Attack', 'Back', 'Quit'],
+        'action_btns': ['K', 'L', 'H', 'B', 'Q']
     }
 }

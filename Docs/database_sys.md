@@ -38,3 +38,13 @@
 - activated mechanisms -- all mechanism ids that have been activated
 - defeated unique enemys -- all enemy ids that have been defeated
 - shortcuts and fast travel -- ids for fast travel and shortcuts
+
+# Player inventory
+- Player id -- uuid connected to player accounts
+- weapons -- All weapons in the player inventory + magical wands
+- armor -- all armor in players_inventory
+- spells -- all spells the player has access to + quantity of each
+- consumables -- player consumables 
+- Speciality_items -- any item that is a speciality item
+- player loadout -- json format the players currently equiped loadout (weapon, armor, active passives)
+
