@@ -13,7 +13,10 @@ gamestage_subchapters = {
                         'imagepath': 'innBedroom.jpeg'
                         },
              '0002': {'name': 'Streets',
-                      'reqs': ['dialogue_0002']
+                      'reqs': ['battle_0001', 'speak_0003'],
+                      'desc': 'My goodness what is that abomination!',
+                      'actions': ['battle_0001', 'speak_0003'],
+                      'imagepath': 'streets1.png'
                       },
              '0003': {'name': 'Doctors Office',
                       'reqs': ['dialogue_0003', 'dialogue_0004']}

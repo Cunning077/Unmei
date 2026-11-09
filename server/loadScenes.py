@@ -1,10 +1,11 @@
 import curses
+import curses.panel
 import textwrap
 from pathlib import Path
 import time
 
 
-from imagetester import BASE_DIR
+
 import utils.curses as cU
 import utils.auth as uA
 from dependencies.gamestate_log import gamestage_subchapters
@@ -29,8 +30,6 @@ class LoadScenes:
         self.hero_info_window = None
         self.battle_actions_window = None
         self.battle_description_window = None
-
-
 
     def welcomeBoard(self):
         stdscr = self.stdscr
@@ -58,7 +57,6 @@ class LoadScenes:
                 curses.color_pair(1) | curses.A_BOLD,
             )
         stdscr.refresh()
-
 
     def logcreateMenu(self):
         stdscr = self.stdscr
@@ -497,7 +495,7 @@ class LoadScenes:
         desc_win = curses.newwin(desc_h, width, enemy_info_h + image_y + character_info_h, 0)
         cU.draw_enemy_info(enemy_info_win, init_battle_packet['enemy_info'])
         enemy_info_win.noutrefresh()
-        cU.draw_enemy_status(enemy_status_win, None)
+        cU.draw_enemy_status(enemy_status_win, init_battle_packet['enemy_status_pack'])
         enemy_status_win.noutrefresh()
         image_name = init_battle_packet['imagepath']
         imagePath = base_dir / 'assets' / 'art' / image_name
@@ -520,6 +518,17 @@ class LoadScenes:
         actions_win.noutrefresh()
         cU.draw_description(desc_win, init_battle_packet['desc'], 'BATTLE DESCRIPTION')
         desc_win.noutrefresh()
+        self.battle_panels = {
+            'enemy_info': curses.panel.new_panel(enemy_info_win),
+            'enemy_status': curses.panel.new_panel(enemy_status_win),
+            'image': curses.panel.new_panel(image_win),
+            'character_info': curses.panel.new_panel(charecter_info_win),
+            'actions': curses.panel.new_panel(actions_win),
+            'description': curses.panel.new_panel(desc_win)
+        }
+
+        curses.panel.update_panels()
+        curses.doupdate()
         curses.doupdate()
         self.enemy_info_window = enemy_info_win
         self.enemy_status_window = enemy_status_win
@@ -528,7 +537,26 @@ class LoadScenes:
         self.battle_actions_window = actions_win
         self.battle_description_window = desc_win
 
-
+    def create_popup(self, popup_packet):
+        stdscr = self.stdscr
+        height, width = stdscr.getmaxyx()
+        h = 25
+        x = 75
+        mid_x = (width // 2) - (x // 2)
+        mid_y = (height // 2) - (h // 2)
+        popup = curses.newwin(h, x, mid_y, mid_x)
+        winMidX =  x // 2
+        curr_y = 1
+        panel = curses.panel.new_panel(popup)
+        cU.draw_clear_panel(popup, 'TUTORIAL')
+        for text in popup_packet['texts']:
+            cU.draw_text(popup, curr_y, winMidX - (len(text) // 2), text, x - 2,)
+            curr_y += 1
+        cU.draw_text(popup, h - 2, winMidX - (23 // 2), 'Press ENTER To Continue', x - 2)
+        curses.panel.update_panels()
+        curses.doupdate()
+        return popup, panel
+        
 
 
         

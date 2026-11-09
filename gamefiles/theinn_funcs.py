@@ -26,7 +26,7 @@ def speak0001(Scenes, gameState):
             case "c":
                 message = textwrap.dedent("""
                     By the gods, my memory grows more treacherous by the day…
-                    I cannot for the life of me recall when this list was given unto me.
+                     cannot for the life of me recall when this list was given unto me.
                     No matter. Let us see what remains to be done before I retire for the night.
 
                     Tonight's Duties
@@ -613,6 +613,7 @@ def speak0002(Scenes, gameState):
             case 't':
                 action_key['status'] = True
                 action_key['state_changed'] = {'req': 'speak0002'}
+                gameState['weapons'].append('fireplace_rake')
                 return action_key 
             case 'q':
                 gen.globalQuit()

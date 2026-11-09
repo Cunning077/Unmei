@@ -8,11 +8,6 @@ import time
 def setup_colors():
     curses.start_color()
 
-    with open("/tmp/unmei_colors.log", "w") as log:
-        log.write(f"Can change colors: {curses.can_change_color()}\n")
-        log.write(f"Available colors: {curses.COLORS}\n")
-        log.write(f"Color pairs: {curses.COLOR_PAIRS}\n")
-
     if curses.can_change_color() and curses.COLORS > 11:
         curses.init_color(10, 1000, 1000, 1000)  # White
         curses.init_color(11, 0, 0, 0)            # Black
@@ -176,6 +171,23 @@ def draw_action(window, actions, actions_btn):
         draw_text(window, row, column,f"[{actions_btn[index]}] {val}", column_width-1,)
     window.noutrefresh()
 
+def draw_selected_action(window, actions, actions_btn, selected_action):
+    draw_clear_panel(window, 'ACTIONS')
+    height, width = window.getmaxyx()
+    column_width = max(1, (width - 4) // 2)
+    for index, val in enumerate(actions):
+        row = 1 + index // 2
+        column = 2 + (index % 2) * column_width
+        if row >= height - 1:
+            break
+        text = f"[{actions_btn[index]}] {val}"
+        if index == selected_action:
+            attr = curses.color_pair(3) | curses.A_BOLD
+            window.addstr(row, column, text[:column_width-1], attr)
+        else:
+            window.addstr(row, column, text[:column_width-1])
+        window.noutrefresh()
+
 def draw_image(stdscr, imagePath, top, left, max_width, max_height):
     with Image.open(imagePath) as source:
         image = source.convert("RGB")
@@ -312,8 +324,10 @@ def draw_enemy_info(window, enemy_info_pack):
 
 def draw_enemy_status(window, enemy_status_pack):
     draw_clear_panel(window, 'ENEMY STATUS')
-    height, wdith = window.getmaxyx()
-    #not sure what to do yet for this
+    height, width = window.getmaxyx()
+    column_width = max(1, (width-4) // 2)
+    draw_text(window, 1, 2, 'Time To Attack', column_width)
+    draw_bar(window, 1, column_width + 2, enemy_status_pack['curr_time'], enemy_status_pack['tot_time'], column_width, curses.color_pair(3))
 
 def draw_character_info(window, hero_info_pack):
     draw_clear_panel(window, 'HERO INFO')
@@ -323,6 +337,8 @@ def draw_character_info(window, hero_info_pack):
     draw_bar(window, 2, 3, hero_info_pack['health'], hero_info_pack['max_health'], column_width, curses.color_pair(3))
     draw_text(window, 4, 2, 'Mana', column_width)
     draw_bar(window, 5, 3, hero_info_pack['mana'], hero_info_pack['max_mana'], column_width, curses.color_pair(3))
+    draw_text(window, 7, 2, 'Stamina', column_width)
+    draw_bar(window, 8, 3, hero_info_pack['stamina'], hero_info_pack['max_stamina'], column_width, curses.color_pair(3))
     i = 1
     col_gap = int(column_width * 0.33)
     for name, val in hero_info_pack['attributes'].items():

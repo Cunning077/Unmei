@@ -2,8 +2,9 @@
 Attributes essentially play a role in battle mechanics each one will play a role in how dmg is calculated on both sides, and in the future will play a role in other world impacts
 
 ## strength
-Strength is related to you damage, damage scales via your strength
+Strength is related to you damage and health, damage scales via your strength
 - each point in strength represents 2 dmg
+- each point is 4 health
 - player starts with 3 points in strength
 
 ## agility

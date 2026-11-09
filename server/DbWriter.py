@@ -7,8 +7,10 @@ import utils.gen as gen
 import json
 
 def init_save(player_id):
-    health = 5
-    maxhealth = 5
+    health = 12
+    maxhealth = 12
+    stamina = 100
+    max_stamina = 100
     attributes = {
         'strength': 3,
         'agility': 1,
@@ -16,7 +18,8 @@ def init_save(player_id):
         'critical_attack': 0,
         'critical_chance': 0,
         'fortitude': 3,
-        'dexterity': 5
+        'dexterity': 5,
+        'endurance': 5
     }
     clean_attributes = gen.listToJSON(attributes)
     talent_tree = {'wip': 'wip'}
@@ -24,7 +27,7 @@ def init_save(player_id):
     conn, cursor = dbconn.gen_cursor('writer')
     sql = pTemps.createProgressionSaveTemp()
     try:
-        cursor.execute(sql, (player_id, health, maxhealth, clean_attributes, ctalent_tree))
+        cursor.execute(sql, (player_id, health, maxhealth, stamina, max_stamina, clean_attributes, ctalent_tree))
         conn.commit()
     except Exception as e:
         conn.rollback()
@@ -58,6 +61,8 @@ def init_save(player_id):
             'curr_exp': 0,
             'health': health,
             'max_health': maxhealth,
+            'stamina': stamina,
+            'max_stamina': max_stamina,
             'attributes': attributes,
             'talent_tree': talent_tree,
             'talent_points': 0,
@@ -122,8 +127,10 @@ def load_save(player_id):
             'curr_exp': pp[1],
             'health': pp[2],
             'max_health': pp[3],
-            'attributes': json.loads(pp[4]),
-            'talent_tree': json.loads(pp[5]),
+            'stamina': pp[4],
+            'max_stamina': pp[5],
+            'attributes': json.loads(pp[6]),
+            'talent_tree': json.loads(pp[7]),
             'talent_points': pp[6],
             'currency': pp[7],
             'gamestage': wp[0],
@@ -153,6 +160,8 @@ def update_save(player_id, gameState):
             gameState['curr_exp'],
             gameState['health'],
             gameState['max_health'],
+            gameState['stamina'],
+            gameState['max_stamina'],
             json.dumps(gameState['attributes']),
             json.dumps(gameState['talent_tree']),
             gameState['talent_points'],

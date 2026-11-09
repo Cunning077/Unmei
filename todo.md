@@ -5,4 +5,5 @@
  - [x] create world state sql temps @done(10/20/26 00:11)
  - [x] look at orchestrators working on actions @done(10/21/26 11:18) 
  - [x] working on puzzle 0001 @done(10/27/26 20:43)
+ - [ ] working on battle enemy timer
  - [ ] WOrking on battle scene @started(10/27/26 20:44)

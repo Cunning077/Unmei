@@ -26,3 +26,7 @@
         This scene will start in your room at the inn, this will be a puzzle scene where you have to essentially get ready for bed completing tasks,
         when the tasks are completed dialgoue one will appear where you will meet the sick man he will ask you to help him investigate a strange sound,
         This will transition into scene 0002
+
+    Scene 0002 - the streets
+        this is when you investigate the strange sound and you will see a mysterious dead looking old
+        woman with runes on her 

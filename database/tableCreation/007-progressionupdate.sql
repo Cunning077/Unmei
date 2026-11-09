@@ -1,0 +1,5 @@
+USE unmei;
+
+ALTER TABLE player_progression
+ADD COLUMN stamina BIGINT UNSIGNED NOT NULL,
+ADD COLUMN max_stamina BIGINT UNSIGNED NOT NULL;

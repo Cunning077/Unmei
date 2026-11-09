@@ -1,4 +1,5 @@
 import gamefiles.theinn_funcs as c0s0001
+import gamefiles.street_funcs as c0s0002
 
 actions_dep = {
     "speak_0001": {
@@ -15,16 +16,17 @@ actions_dep = {
         'actions_name': [''],
         "action_btn": [''],
         'function_file': c0s0001.speak0002
-        }
-}
-
-battle_actions = {
-    'home': {
-        'actions': ['Attacks', 'Defense', 'Items', 'Spells', 'Quit'],
-        'action_btns': ['A', 'D', 'I', 'S', 'Q']
     },
-    'attacks': {
-        'actions': ['Quick-Attack', 'Light-Attack', 'Heavy-Attack', 'Back', 'Quit'],
-        'action_btns': ['K', 'L', 'H', 'B', 'Q']
+    'battle_0001': {
+        'actions_name': [''],
+        'action_btn': [''],
+        'function_file': c0s0002.battle0001
+    },
+    'speak_0003': {
+        'actions_name': [''],
+        'action_btn': [''],
+        'function_file': c0s0002.speak0003
     }
 }
+
+
